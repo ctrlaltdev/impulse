@@ -1,0 +1,23 @@
+FROM arm64v8/alpine:latest
+
+LABEL name='impulse'
+LABEL version='0.2'
+LABEL description='An endpoint checking service'
+LABEL org.ctrlaltdev.vendor='ctrlaltdev'
+
+COPY qemu-aarch64-static /usr/bin/
+
+RUN set -x && apk --no-cache add python3
+
+WORKDIR /impulse
+
+VOLUME /impulse/hosts
+VOLUME /impulse/db
+
+ADD db/* ./db/
+ADD hosts/* ./hosts/
+ADD impulse.py ./
+
+RUN echo "* * * * * /impulse/impulse.py >> /dev/null" | crontab -
+
+ENTRYPOINT [ "crond" ]
